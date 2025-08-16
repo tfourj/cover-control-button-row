@@ -32,6 +32,7 @@ class CustomCoverControlRow extends LitElement {
 			customOpenConfirmationText: undefined,
 			customCloseConfirmationText: undefined,
 			customStopConfirmationText: undefined,
+			triggertimer: undefined,
 			debugMode: true,
 		};
 	}
@@ -260,6 +261,44 @@ class CustomCoverControlRow extends LitElement {
 			console.log(`🎯 ${position.toUpperCase()} action - Service: ${service}, Confirmation: ${confirmationText || 'none'}`);
 		}
 
+		// Check for timer trigger configuration
+		const triggerConfig = this._config.triggertimer;
+		let shouldTriggerTimer = false;
+		let timerId = null;
+
+		if (triggerConfig) {
+			const currentUser = this._getCurrentUser();
+			
+			if (this._config.debugMode) {
+				console.log(`🔍 Timer config check - Current user: ${currentUser}, Config: ${triggerConfig}`);
+			}
+
+			// Split by semicolon to handle multiple timer configurations
+			const timerConfigs = triggerConfig.split(';');
+			
+			for (const config of timerConfigs) {
+				const trimmedConfig = config.trim();
+				if (trimmedConfig.includes('/')) {
+					const [requiredUsername, timerEntityId] = trimmedConfig.split('/');
+					
+					if (this._config.debugMode) {
+						console.log(`🔍 Checking timer config - Required: "${requiredUsername}", Timer: ${timerEntityId}`);
+						console.log(`🔍 Case-insensitive comparison - Current: "${currentUser?.toLowerCase()}", Required: "${requiredUsername.toLowerCase()}"`);
+					}
+
+					if (currentUser && currentUser.toLowerCase() === requiredUsername.toLowerCase()) {
+						shouldTriggerTimer = true;
+						timerId = timerEntityId;
+						
+						if (this._config.debugMode) {
+							console.log(`✅ Match found! Will trigger timer: ${timerId} (case-insensitive match)`);
+						}
+						break; // Stop at first match
+					}
+				}
+			}
+		}
+
 		// Execute directly if no confirmation text, otherwise use confirmation dialog
 		if (confirmationText) {
 			// Create tap action configuration with confirmation
@@ -280,10 +319,20 @@ class CustomCoverControlRow extends LitElement {
 
 			// Use hass-action event for confirmation dialog
 			this._dispatchHassAction(tapAction);
+			
+			// Trigger timer if conditions are met (after confirmation dialog is shown)
+			if (shouldTriggerTimer && timerId) {
+				this._triggerTimer(timerId);
+			}
 		} else {
 			// Execute directly without confirmation
 			if (this._config.debugMode) {
 				console.log('⚡ Executing service call directly without confirmation');
+			}
+
+			// Trigger timer if conditions are met
+			if (shouldTriggerTimer && timerId) {
+				this._triggerTimer(timerId);
 			}
 
 			const [domain, serviceCall] = service.split('.');
@@ -321,6 +370,22 @@ class CustomCoverControlRow extends LitElement {
 		}
 		
 		this.dispatchEvent(event);
+	}
+
+	_getCurrentUser() {
+		// Get current user from hass object
+		return this.hass && this.hass.user ? this.hass.user.name : null;
+	}
+
+	_triggerTimer(timerId) {
+		if (this._config.debugMode) {
+			console.log(`⏰ Triggering timer: ${timerId}`);
+		}
+
+		// Call the timer.start service
+		this.hass.callService('timer', 'start', {}, {
+			entity_id: timerId
+		});
 	}
 
 
