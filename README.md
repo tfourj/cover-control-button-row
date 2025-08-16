@@ -43,6 +43,9 @@ Then to use this in a card place the following in your entity card:
 | customOpenText | String | No | 'OPN' | Sets the text of the "open" control button |
 | customStopText | String | No | 'STP' | Sets the text of the "stop" control button |
 | customCloseText | String | No | 'CLS' | Sets the text of the "close" control button |
+| customOpenConfirmationText | String | No | null | If set, shows a Yes/No confirmation dialog before opening the cover |
+| customStopConfirmationText | String | No | null | If set, shows a Yes/No confirmation dialog before stopping the cover |
+| customCloseConfirmationText | String | No | null | If set, shows a Yes/No confirmation dialog before closing the cover |
 | state_color | Boolean | No | false | Sets the icon color of the entity to reflect the current state |
 
 
@@ -78,6 +81,26 @@ This plugin can also be used with a group of positionable covers by creating a "
             customCloseText: 'CLOSE'
             width: '15px'
             height: '15px'
+  ```
+
+<b>Configuration Example with Confirmation Dialogs:</b>
+    
+  ```
+    cards:
+      - type: entities
+        title: Garage Door with Confirmations
+        show_header_toggle: false
+        entities:
+          - type: custom:cover-control-button-row
+            name: Garage Door
+            entity: cover.garage_door
+            ## Add confirmation prompts for safety
+            customOpenConfirmationText: 'Are you sure you want to open the garage door?'
+            customCloseConfirmationText: 'Are you sure you want to close the garage door?'
+            customStopConfirmationText: 'Are you sure you want to stop the garage door?'
+            customOpenText: 'OPEN'
+            customStopText: 'STOP'
+            customCloseText: 'CLOSE'
   ```
 
 This is with the default Lovelace frontend theme set:

@@ -29,6 +29,10 @@ class CustomCoverControlRow extends LitElement {
 			customOpenText: 'OPN',
 			customStopText: 'STP',
 			customCloseText: 'CLS',
+			customOpenConfirmationText: undefined,
+			customCloseConfirmationText: undefined,
+			customStopConfirmationText: undefined,
+			debugMode: true,
 		};
 	}
 
@@ -233,15 +237,93 @@ class CustomCoverControlRow extends LitElement {
 	}
 
 	setPosition(e) {
+		if (this._config.debugMode) {
+			console.log('🔘 Cover Control Button Row - Button clicked!');
+		}
+		
 		const position = e.currentTarget.getAttribute('name');
-		if( position == 'open' ){
-			this.hass.callService('cover', 'open_cover', {entity_id: this._config.entity});
+		let service, confirmationText;
+		
+		// Determine service and confirmation text based on position
+		if (position == 'open') {
+			service = 'cover.open_cover';
+			confirmationText = this._config.customOpenConfirmationText;
 		} else if (position == 'stop') {
-			this.hass.callService('cover', 'stop_cover', {entity_id: this._config.entity});
+			service = 'cover.stop_cover';
+			confirmationText = this._config.customStopConfirmationText;
 		} else if (position == 'close') {
-			this.hass.callService('cover', 'close_cover', {entity_id: this._config.entity});
+			service = 'cover.close_cover';
+			confirmationText = this._config.customCloseConfirmationText;
+		}
+
+		if (this._config.debugMode) {
+			console.log(`🎯 ${position.toUpperCase()} action - Service: ${service}, Confirmation: ${confirmationText || 'none'}`);
+		}
+
+		// Execute directly if no confirmation text, otherwise use confirmation dialog
+		if (confirmationText) {
+			// Create tap action configuration with confirmation
+			const tapAction = {
+				action: 'perform-action',
+				perform_action: service,
+				target: {
+					entity_id: this._config.entity
+				},
+				confirmation: {
+					text: confirmationText
+				}
+			};
+
+			if (this._config.debugMode) {
+				console.log('🔧 Created tapAction with confirmation:', tapAction);
+			}
+
+			// Use hass-action event for confirmation dialog
+			this._dispatchHassAction(tapAction);
+		} else {
+			// Execute directly without confirmation
+			if (this._config.debugMode) {
+				console.log('⚡ Executing service call directly without confirmation');
+			}
+
+			const [domain, serviceCall] = service.split('.');
+			this.hass.callService(domain, serviceCall, {}, {
+				entity_id: this._config.entity
+			});
 		}
 	}
+
+	_dispatchHassAction(tapAction) {
+		if (this._config.debugMode) {
+			console.log('📡 _dispatchHassAction called with:', tapAction);
+		}
+
+		// Create the action config for hass-action event
+		const actionConfig = {
+			entity: this._config.entity,
+			tap_action: tapAction
+		};
+
+		// Create and dispatch the hass-action event
+		const event = new Event("hass-action", {
+			bubbles: true,
+			composed: true,
+			cancelable: true
+		});
+		
+		event.detail = {
+			config: actionConfig,
+			action: "tap"
+		};
+
+		if (this._config.debugMode) {
+			console.log('📤 Dispatching hass-action event with perform-action format');
+		}
+		
+		this.dispatchEvent(event);
+	}
+
+
 }
 	
 customElements.define('cover-control-button-row', CustomCoverControlRow);
