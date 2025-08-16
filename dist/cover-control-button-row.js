@@ -370,6 +370,7 @@ class CustomCoverControlRow extends LitElement {
 		}
 		
 		this.dispatchEvent(event);
+		this._clearTextSelection();
 	}
 
 	_getCurrentUser() {
@@ -386,6 +387,32 @@ class CustomCoverControlRow extends LitElement {
 		this.hass.callService('timer', 'start', {}, {
 			entity_id: timerId
 		});
+	}
+
+	_clearTextSelection() {
+		// Clear any text selection/highlighting
+		if (window.getSelection) {
+			const selection = window.getSelection();
+			if (selection.removeAllRanges) {
+				selection.removeAllRanges();
+			} else if (selection.empty) {
+				selection.empty();
+			}
+		}
+		
+		// Also clear document selection (IE compatibility)
+		if (document.selection && document.selection.empty) {
+			document.selection.empty();
+		}
+		
+		// Remove focus from any active element
+		if (document.activeElement && document.activeElement.blur) {
+			document.activeElement.blur();
+		}
+		
+		if (this._config.debugMode) {
+			console.log('🧹 Cleared text selection and focus');
+		}
 	}
 
 
