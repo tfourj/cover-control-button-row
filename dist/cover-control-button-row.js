@@ -33,7 +33,7 @@ class CustomCoverControlRow extends LitElement {
 			customCloseConfirmationText: undefined,
 			customStopConfirmationText: undefined,
 			triggertimer: undefined,
-			debugMode: true,
+			debugMode: false,
 		};
 	}
 

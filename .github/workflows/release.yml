@@ -1,0 +1,35 @@
+name: Release for HACS
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify build asset exists
+        run: |
+          if [ ! -f dist/cover-control-button-row.js ]; then
+            echo "dist/cover-control-button-row.js not found. Ensure the built file exists before tagging." >&2
+            exit 1
+          fi
+
+      - name: Create GitHub Release and upload asset for HACS
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            dist/cover-control-button-row.js
+
+

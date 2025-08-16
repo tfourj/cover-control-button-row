@@ -46,6 +46,7 @@ Then to use this in a card place the following in your entity card:
 | customOpenConfirmationText | String | No | null | If set, shows a Yes/No confirmation dialog before opening the cover |
 | customStopConfirmationText | String | No | null | If set, shows a Yes/No confirmation dialog before stopping the cover |
 | customCloseConfirmationText | String | No | null | If set, shows a Yes/No confirmation dialog before closing the cover |
+| triggertimer | String | No | null | Triggers specific timers for specific users. Format: "username/timer.entity_id" or multiple: "user1/timer.timer1;user2/timer.timer2" |
 | state_color | Boolean | No | false | Sets the icon color of the entity to reflect the current state |
 
 
@@ -101,6 +102,29 @@ This plugin can also be used with a group of positionable covers by creating a "
             customOpenText: 'OPEN'
             customStopText: 'STOP'
             customCloseText: 'CLOSE'
+  ```
+
+<b>Configuration Example with Timer Triggers:</b>
+    
+  ```
+    cards:
+      - type: entities
+        title: Garage Door with User-Specific Timers
+        show_header_toggle: false
+        entities:
+          - type: custom:cover-control-button-row
+            name: Garage Door
+            entity: cover.garage_door
+            ## Timer configuration - triggers different timers for different users
+            ## Single user: triggertimer: "john/timer.garage_access"
+            ## Multiple users: triggertimer: "john/timer.john_garage;mary/timer.mary_garage;admin/timer.admin_access"
+            triggertimer: "john/timer.garage_timer;mary/timer.security_timer"
+            customOpenText: 'OPEN'
+            customStopText: 'STOP'
+            customCloseText: 'CLOSE'
+            ## Optional: Add confirmations - timer only starts if user confirms
+            customOpenConfirmationText: 'Open garage door?'
+            customCloseConfirmationText: 'Close garage door?'
   ```
 
 This is with the default Lovelace frontend theme set:
