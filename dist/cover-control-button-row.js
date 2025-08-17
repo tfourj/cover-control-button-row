@@ -34,6 +34,7 @@ class CustomCoverControlRow extends LitElement {
 			customStopConfirmationText: undefined,
 			triggertimer: undefined,
 			debugMode: false,
+			preventdefaultpointer: false,
 		};
 	}
 
@@ -85,8 +86,14 @@ class CustomCoverControlRow extends LitElement {
 	}
 	
 	render() {
+		// Create config for hui-generic-entity-row, disabling tap_action if preventdefaultpointer is true
+		const rowConfig = { ...this._config };
+		if (this._config.preventdefaultpointer) {
+			rowConfig.tap_action = { action: 'none' };
+		}
+		
 		return html`
-			<hui-generic-entity-row .hass="${this.hass}" .config="${this._config}">
+			<hui-generic-entity-row .hass="${this.hass}" .config="${rowConfig}">
 				<div id='button-container' class='box'>
 					<button
 						class='position'

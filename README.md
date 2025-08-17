@@ -48,6 +48,7 @@ Then to use this in a card place the following in your entity card:
 | customCloseConfirmationText | String | No | null | If set, shows a Yes/No confirmation dialog before closing the cover |
 | triggertimer | String | No | null | Triggers specific timers for specific users. Format: "username/timer.entity_id" or multiple: "user1/timer.timer1;user2/timer.timer2" |
 | state_color | Boolean | No | false | Sets the icon color of the entity to reflect the current state |
+| preventdefaultpointer | Boolean | No | false | Set to true to prevent clicking on the row pointer from opening the cover control dialog |
 
 
 The values for the colors can be any valid color string in "HEX", "RGB" or by color name.
